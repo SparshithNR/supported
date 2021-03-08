@@ -3,6 +3,7 @@
 const { expect } = require('chai');
 const execa = require('execa');
 const { getBinPath } = require('get-bin-path');
+const fs = require('fs');
 const registries = require('./registries');
 
 async function runSupportedCmd(inputArgs) {
@@ -38,6 +39,17 @@ describe('CLI', function () {
       expect(child.exitCode).to.eql(0);
       expect(child.stderr).to.eql('- working');
       expect(child.stdout).to.includes('Congrats!');
+    });
+
+    it('works against two projects', async function () {
+      const child = await runSupportedCmd([
+        `${__dirname}/fixtures/supported-project`,
+        `${__dirname}/fixtures/unsupported-project`
+      ]);
+      expect(child.exitCode).to.eql(1);
+      expect(child.stderr).to.eql('- working');
+      expect(child.stdout).to.includes('✓ supported-project');
+      expect(child.stdout).to.includes('✗ unsupported-project');
     });
 
     it('works against a unsupported project', async function () {
@@ -145,18 +157,29 @@ describe('CLI', function () {
       );
     });
   });
+  describe('--csv', function () {
+    afterEach(() => {
+      let filePath = `${__dirname}/fixtures/unsupported-project/unsupported-project-support-audit.csv`;
+      if (fs.existsSync(filePath))
+      fs.unlinkSync(filePath);
+    });
+    it('works against a unsupported project', async function () {
+      const child = await runSupportedCmd([`${__dirname}/fixtures/unsupported-project`, '--csv']);
+      expect(child.exitCode).to.eql(1);
+      expect(child.stderr).to.eql('- working');
+      expect(child.stdout).to.includes(`Report for unsupported-project created at ${__dirname}/fixtures/unsupported-project/unsupported-project-support-audit.csv`);
+    });
+  });
   describe('--json', function () {
     it('works against a fully supported project', async function () {
       const child = await runSupportedCmd([`${__dirname}/fixtures/supported-project`, '--json']);
       expect(child.exitCode).to.eql(0);
       expect(child.stderr).to.eql('- working');
       expect(JSON.parse(child.stdout)).to.eql({
+        isExpiringSoon: false,
         isInSupportWindow: true,
-        project: {
-          name: 'supported-project',
-          type: 'node_module',
-          path: `${__dirname}/fixtures/supported-project`,
-        },
+        projectName: 'supported-project',
+        projectPath: `${__dirname}/fixtures/supported-project`,
         supportChecks: [
           {
             isSupported: true,
@@ -206,11 +229,8 @@ describe('CLI', function () {
       });
       expect(jsonOut).to.eql({
         isInSupportWindow: false,
-        project: {
-          name: 'unsupported-project',
-          path: `${__dirname}/fixtures/unsupported-project`,
-          type: 'node_module',
-        },
+        projectName: 'unsupported-project',
+        projectPath: `${__dirname}/fixtures/unsupported-project`,
         supportChecks: [
           {
             isSupported: false,
