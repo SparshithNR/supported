@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const { convertToCsv } = require('../lib/output/csv-output');
 
 describe('csv', function () {
-  it('supported project', () => {
+  it('supported project', function () {
     let supportResult = {
       projectName: 'example',
       isInSupportWindow: true,
@@ -21,14 +21,14 @@ describe('csv', function () {
           resolvedVersion: '15.3.0',
           latestVersion: '>=14.*',
           message: '',
-        }
+        },
       ],
-    }
+    };
     let result = convertToCsv(supportResult);
     expect(result).to.includes(`✓ Congrats!
     Your project is using only supported versions of libraries. No action is required.`);
   });
-  it('unsupported project', () => {
+  it('unsupported project', function () {
     let supportResult = {
       projectName: 'example',
       isInSupportWindow: false,
@@ -45,9 +45,9 @@ describe('csv', function () {
           resolvedVersion: '15.3.0',
           latestVersion: '>=14.*',
           message: '',
-        }
+        },
       ],
-    }
+    };
     let result = convertToCsv(supportResult);
     expect(result).to.includes(`Support Policy Problem Detected!
     Please upgrade your dependencies!

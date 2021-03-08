@@ -6,4 +6,4 @@ const setupProject = require('./lib/project/setup-project');
 module.exports = {
   run,
   setupProject,
-}
+};

@@ -44,7 +44,7 @@ describe('CLI', function () {
     it('works against two projects', async function () {
       const child = await runSupportedCmd([
         `${__dirname}/fixtures/supported-project`,
-        `${__dirname}/fixtures/unsupported-project`
+        `${__dirname}/fixtures/unsupported-project`,
       ]);
       expect(child.exitCode).to.eql(1);
       expect(child.stderr).to.eql('- working');
@@ -158,16 +158,17 @@ describe('CLI', function () {
     });
   });
   describe('--csv', function () {
-    afterEach(() => {
+    afterEach(function () {
       let filePath = `${__dirname}/fixtures/unsupported-project/unsupported-project-support-audit.csv`;
-      if (fs.existsSync(filePath))
-      fs.unlinkSync(filePath);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     });
     it('works against a unsupported project', async function () {
       const child = await runSupportedCmd([`${__dirname}/fixtures/unsupported-project`, '--csv']);
       expect(child.exitCode).to.eql(1);
       expect(child.stderr).to.eql('- working');
-      expect(child.stdout).to.includes(`Report for unsupported-project created at ${__dirname}/fixtures/unsupported-project/unsupported-project-support-audit.csv`);
+      expect(child.stdout).to.includes(
+        `Report for unsupported-project created at ${__dirname}/fixtures/unsupported-project/unsupported-project-support-audit.csv`,
+      );
     });
   });
   describe('--json', function () {
