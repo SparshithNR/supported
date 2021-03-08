@@ -2,8 +2,8 @@
 
 const { expect } = require('chai');
 const execa = require('execa');
-const fs = require('fs');
 const { getBinPath } = require('get-bin-path');
+const fs = require('fs');
 const registries = require('./registries');
 
 async function runSupportedCmd(inputArgs) {
@@ -11,13 +11,10 @@ async function runSupportedCmd(inputArgs) {
   if (inputArgs && inputArgs.length) {
     args.push.apply(args, inputArgs);
   }
-  return execa(
-    'node', args,
-    {
-      shell: true,
-      reject: false,
-    },
-  )
+  return execa('node', args, {
+    shell: true,
+    reject: false,
+  });
 }
 
 describe('CLI', function () {
@@ -80,16 +77,15 @@ describe('CLI', function () {
 
   describe('--verbose', function () {
     it('works against a unsupported project', async function () {
-      const child = await runSupportedCmd([`${__dirname}/fixtures/unsupported-project`, '--verbose']);
+      const child = await runSupportedCmd([
+        `${__dirname}/fixtures/unsupported-project`,
+        '--verbose',
+      ]);
       expect(child.exitCode).to.eql(1);
       expect(child.stderr).to.eql('- working');
       expect(child.stdout).to.includes('Support Policy Problem Detected!');
-      expect(child.stdout).to.includes(
-        ' @eslint-ast/eslint-plugin-graphql  1.0.4     1.0.4',
-      );
-      expect(child.stdout).to.includes(
-        'es6-promise  3.3.1     4.2.8   major           7 qtrs',
-      );
+      expect(child.stdout).to.includes(' @eslint-ast/eslint-plugin-graphql  1.0.4     1.0.4');
+      expect(child.stdout).to.includes('es6-promise  3.3.1     4.2.8   major           7 qtrs');
     });
 
     it('works against a supported project', async function () {
@@ -102,47 +98,65 @@ describe('CLI', function () {
     });
 
     it('works against a version expires soon project', async function () {
-      const child = await runSupportedCmd([`${__dirname}/fixtures/version-expire-soon`, '--verbose'])
+      const child = await runSupportedCmd([
+        `${__dirname}/fixtures/version-expire-soon`,
+        '--verbose',
+      ]);
       expect(child.exitCode).to.eql(0);
       expect(child.stderr).to.eql('- working');
       expect(child.stdout).to.includes('⚠ Warning!');
-      expect(child.stdout).to.includes(
-        `@stefanpenner/a  1.0.3     2.0.0   major           3 qtrs`,
-      );
-      expect(child.stdout).to.includes(
-        `node             10.0.0    >=14.*  LTS             1 qtr`,
-      );
+      expect(child.stdout).to.includes(`@stefanpenner/a  1.0.3     2.0.0   major           3 qtrs`);
+      expect(child.stdout).to.includes(`node             10.0.0    >=14.*  LTS             1 qtr`);
     });
   });
 
-  describe('Filter options like --unsupported/expiring/supported', function() {
+  describe('Filter options like --unsupported/expiring/supported', function () {
     it('works against a unsupported project with --unsupported option', async function () {
-      const child = await runSupportedCmd([`${__dirname}/fixtures/unsupported-project`, '--unsupported']);
+      const child = await runSupportedCmd([
+        `${__dirname}/fixtures/unsupported-project`,
+        '--unsupported',
+      ]);
       expect(child.exitCode).to.eql(1);
       expect(child.stderr).to.eql('- working');
       expect(child.stdout).to.includes('Support Policy Problem Detected!');
-      expect(child.stdout).to.includes(
-        'es6-promise  3.3.1     4.2.8   major           7 qtrs',
-      );
+      expect(child.stdout).to.includes('es6-promise  3.3.1     4.2.8   major           7 qtrs');
     });
 
     it('works against a unsupported project with --supported option', async function () {
-      const child = await runSupportedCmd([`${__dirname}/fixtures/unsupported-project`, '--supported']);
+      const child = await runSupportedCmd([
+        `${__dirname}/fixtures/unsupported-project`,
+        '--supported',
+      ]);
       expect(child.exitCode).to.eql(1);
       expect(child.stderr).to.eql('- working');
       expect(child.stdout).to.includes('Support Policy Problem Detected!');
-      expect(child.stdout).to.includes(
-        '@eslint-ast/eslint-plugin-graphql  1.0.4     1.0.4',
-      );
+      expect(child.stdout).to.includes('@eslint-ast/eslint-plugin-graphql  1.0.4     1.0.4');
     });
 
     it('works against a unsupported project with --expiring option', async function () {
-      const child = await runSupportedCmd([`${__dirname}/fixtures/unsupported-project`, '--expiring']);
+      const child = await runSupportedCmd([
+        `${__dirname}/fixtures/unsupported-project`,
+        '--expiring',
+      ]);
       expect(child.exitCode).to.eql(1);
       expect(child.stderr).to.eql('- working');
       expect(child.stdout).to.includes('Support Policy Problem Detected!');
       expect(child.stdout).to.includes(
         '@stefanpenner/a  1.0.3                          2.0.0   major           3 qtrs',
+      );
+    });
+  });
+  describe('--csv', function () {
+    afterEach(function () {
+      let filePath = `${__dirname}/fixtures/unsupported-project/unsupported-project-support-audit.csv`;
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    });
+    it('works against a unsupported project', async function () {
+      const child = await runSupportedCmd([`${__dirname}/fixtures/unsupported-project`, '--csv']);
+      expect(child.exitCode).to.eql(1);
+      expect(child.stderr).to.eql('- working');
+      expect(child.stdout).to.includes(
+        `Report created at ${__dirname}/fixtures/unsupported-project`,
       );
     });
   });
